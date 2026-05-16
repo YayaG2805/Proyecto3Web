@@ -69,6 +69,75 @@ h1 {
   line-height: 1.6;
 }
 
+.setup-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 320px);
+  gap: 24px;
+  margin-top: 24px;
+  padding: 24px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: rgba(23, 36, 51, 0.82);
+}
+
+.setup-panel h2 {
+  margin: 0 0 16px;
+  font-size: 1.4rem;
+}
+
+.setup-panel p {
+  margin: 8px 0;
+  color: var(--color-muted);
+}
+
+.setup-panel strong {
+  color: var(--color-text);
+}
+
+.status-message {
+  color: var(--color-primary);
+}
+
+.setup-actions {
+  display: grid;
+  gap: 10px;
+}
+
+.setup-actions button {
+  min-height: 42px;
+  border: 0;
+  border-radius: 6px;
+  color: var(--color-text);
+  background: var(--color-primary-dark);
+  cursor: pointer;
+}
+
+.setup-actions button:disabled {
+  color: var(--color-muted);
+  background: var(--color-surface-soft);
+  cursor: not-allowed;
+}
+
+.category-list {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.category-list li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid color-mix(in srgb, var(--category-color) 60%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--category-color) 18%, transparent);
+}
+
 @media (max-width: 680px) {
   .app-shell {
     width: min(100% - 24px, 1120px);
@@ -77,5 +146,10 @@ h1 {
 
   .hero {
     padding: 24px;
+  }
+
+  .setup-panel {
+    grid-template-columns: 1fr;
+    padding: 20px;
   }
 }
