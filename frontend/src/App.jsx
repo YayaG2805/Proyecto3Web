@@ -24,6 +24,20 @@ function App() {
     [items]
   );
 
+  const sesionesCompletadas = useMemo(
+    () => itemsActivos.filter((item) => item.estado === "completado").length,
+    [itemsActivos]
+  );
+
+  const minutosTotales = useMemo(
+    () =>
+      itemsActivos.reduce(
+        (total, item) => total + Number(item.atributos?.duracionMinutos ?? 0),
+        0
+      ),
+    [itemsActivos]
+  );
+
   function agregarItem(item) {
     setItems((itemsActuales) => [item, ...itemsActuales]);
     setMensaje("Sesion agregada correctamente.");
@@ -67,19 +81,29 @@ function App() {
   return (
     <main className="app-shell">
       <header className="hero">
-        <p className="eyebrow">Fase 1</p>
-        <h1>Mi Bitacora de Entrenamiento</h1>
-        <p className="subtitle">
-          Fase 1 — useState + useEffect + Backend Express
-        </p>
-        <p className="phase-note">
-          Frontend funcionando con LocalStorage. Backend separado para Fase 1.
-        </p>
+        <div className="hero-copy">
+          <h1>Iron Diary</h1>
+        </div>
+
+        <div className="summary-board" aria-label="Resumen de sesiones">
+          <div>
+            <span>{itemsActivos.length}</span>
+            <p>Activas</p>
+          </div>
+          <div>
+            <span>{sesionesCompletadas}</span>
+            <p>Completadas</p>
+          </div>
+          <div>
+            <span>{minutosTotales}</span>
+            <p>Minutos</p>
+          </div>
+        </div>
       </header>
 
       {mensaje && <p className="status-message">{mensaje}</p>}
 
-      <div className="crud-layout">
+      <section className="crud-layout" aria-label="CRUD de sesiones">
         <FormularioItem
           itemEditando={itemEditando}
           onAgregar={agregarItem}
@@ -93,7 +117,7 @@ function App() {
           onEditar={iniciarEdicion}
           onArchivar={archivarItem}
         />
-      </div>
+      </section>
     </main>
   );
 }
