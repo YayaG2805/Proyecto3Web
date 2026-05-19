@@ -1,6 +1,7 @@
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
+import { initDb } from "./db/index.js";
 
 dotenv.config();
 
@@ -29,6 +30,17 @@ app.use((error, req, res, next) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`API escuchando en http://localhost:${PORT}`);
-});
+async function startServer() {
+  try {
+    await initDb();
+
+    app.listen(PORT, () => {
+      console.log(`API escuchando en http://localhost:${PORT}`);
+    });
+  } catch (error) {
+    console.error("No se pudo iniciar la base de datos:", error.message);
+    process.exit(1);
+  }
+}
+
+startServer();
