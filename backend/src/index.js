@@ -2,6 +2,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 import { initDb } from "./db/index.js";
+import itemsRouter from "./routes/items.js";
 
 dotenv.config();
 
@@ -18,6 +19,8 @@ app.use(express.json());
 app.get("/api/health", (req, res) => {
   res.json({ ok: true, message: "API funcionando" });
 });
+
+app.use("/api/items", itemsRouter);
 
 app.use((req, res) => {
   res.status(404).json({ error: "Ruta no encontrada" });
