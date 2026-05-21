@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { forwardRef, useEffect, useState } from "react";
 import { CATEGORIAS } from "../utils/categorias";
 
 const ESTADOS = ["planeado", "completado", "omitido"];
@@ -79,12 +79,11 @@ function convertirEjercicios(valor) {
     .filter(Boolean);
 }
 
-function FormularioItem({
-  itemEditando,
-  onAgregar,
-  onActualizar,
-  onCancelarEdicion
-}) {
+// forwardRef permite que App.jsx controle el focus del input de nombre (useRef uso 1)
+const FormularioItem = forwardRef(function FormularioItem(
+  { itemEditando, onAgregar, onActualizar, onCancelarEdicion },
+  ref
+) {
   const [formulario, setFormulario] = useState(FORMULARIO_INICIAL);
   const [errores, setErrores] = useState({});
 
@@ -165,6 +164,7 @@ function FormularioItem({
       <label>
         Nombre
         <input
+          ref={ref}
           name="nombre"
           value={formulario.nombre}
           onChange={actualizarCampo}
@@ -184,7 +184,7 @@ function FormularioItem({
             <option value="">Seleccionar</option>
             {CATEGORIAS.map((categoria) => (
               <option key={categoria.id} value={categoria.id}>
-                {categoria.nombre}
+                {categoria.emoji} {categoria.nombre}
               </option>
             ))}
           </select>
@@ -311,6 +311,6 @@ function FormularioItem({
       </button>
     </form>
   );
-}
+});
 
 export default FormularioItem;
