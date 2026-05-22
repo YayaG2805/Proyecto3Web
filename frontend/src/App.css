@@ -1,19 +1,40 @@
+/* ===================================================================
+   VARIABLES POR TEMA
+   6 colores documentados en README + derivados de soporte
+   =================================================================== */
+
+body[data-theme="claro"] {
+  --color-bg:           #f7f7f8;
+  --color-surface:      #ffffff;
+  --color-text:         #1a1a1a;
+  --color-accent:       #f46e53;
+  --color-border:       #e5e7eb;
+  --color-muted:        #6b7280;
+
+  --color-surface-deep: #f3f4f6;
+  --color-input-bg:     #f9fafb;
+  --color-shadow:       rgba(0, 0, 0, 0.08);
+}
+
+body[data-theme="oscuro"] {
+  --color-bg:           #0f172a;
+  --color-surface:      #1e293b;
+  --color-text:         #f1f5f9;
+  --color-accent:       #f97316;
+  --color-border:       #334155;
+  --color-muted:        #94a3b8;
+
+  --color-surface-deep: #0a1120;
+  --color-input-bg:     #080e1a;
+  --color-shadow:       rgba(0, 0, 0, 0.82);
+}
+
+/* ===================================================================
+   BASE
+   =================================================================== */
+
 :root {
-  --color-bg: #020203;
-  --color-bg-deep: #05070a;
-  --color-surface: #0b0f14;
-  --color-surface-soft: #141a22;
-  --color-text: #f5f7fa;
-  --color-muted: #9aa4b2;
-  --color-primary: #2563eb;
-  --color-primary-dark: #1e40af;
-  --color-danger: #1f2937;
-  --color-border: #252d38;
-  --color-border-strong: #334155;
-  --shadow-card: 0 28px 80px rgba(0, 0, 0, 0.82);
   font-family: Georgia, "Times New Roman", ui-serif, serif;
-  color: var(--color-text);
-  background: var(--color-bg);
 }
 
 * {
@@ -24,8 +45,14 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  background: var(--color-bg);
+  color: var(--color-text);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+body[data-theme="oscuro"] {
   background:
-    linear-gradient(180deg, rgba(37, 99, 235, 0.16), transparent 24rem),
+    linear-gradient(180deg, rgba(249, 115, 22, 0.06), transparent 24rem),
     repeating-linear-gradient(
       90deg,
       rgba(255, 255, 255, 0.012) 0,
@@ -48,12 +75,6 @@ input,
 select,
 textarea {
   font: inherit;
-}
-
-button,
-input,
-select,
-textarea {
   transition:
     border-color 160ms ease,
     box-shadow 160ms ease,
@@ -65,9 +86,13 @@ button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 3px solid rgba(37, 99, 235, 0.36);
+  outline: 3px solid color-mix(in srgb, var(--color-accent) 50%, transparent);
   outline-offset: 2px;
 }
+
+/* ===================================================================
+   APP SHELL
+   =================================================================== */
 
 .app-shell {
   width: min(1120px, calc(100% - 32px));
@@ -75,16 +100,27 @@ textarea:focus-visible {
   padding: 48px 0;
 }
 
+/* ===================================================================
+   HERO
+   =================================================================== */
+
 .hero {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(240px, 360px);
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 420px);
   gap: 28px;
-  align-items: end;
+  align-items: start;
   padding: 38px;
-  border: 1px solid rgba(71, 85, 105, 0.82);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
+  background: var(--color-surface);
+  box-shadow: 0 4px 24px var(--color-shadow);
+  position: relative;
+  overflow: hidden;
+}
+
+body[data-theme="oscuro"] .hero {
   background:
-    linear-gradient(180deg, rgba(12, 16, 22, 0.98), rgba(2, 3, 5, 0.98)),
+    linear-gradient(180deg, rgba(12, 16, 22, 0.98), rgba(15, 23, 42, 0.98)),
     repeating-linear-gradient(
       135deg,
       rgba(255, 255, 255, 0.02) 0,
@@ -92,25 +128,26 @@ textarea:focus-visible {
       transparent 1px,
       transparent 18px
     );
+  border-color: rgba(71, 85, 105, 0.82);
   box-shadow:
-    var(--shadow-card),
+    0 28px 80px var(--color-shadow),
     inset 0 0 0 1px rgba(255, 255, 255, 0.025),
     inset 0 -40px 90px rgba(0, 0, 0, 0.56);
-  position: relative;
-  overflow: hidden;
 }
 
 .hero::before {
   content: "";
   position: absolute;
-  pointer-events: none;
-}
-
-.hero::before {
   inset: 0 0 auto;
   height: 3px;
-  background: linear-gradient(90deg, #111827, #2563eb, #94a3b8, #111827);
-  box-shadow: 0 0 28px rgba(37, 99, 235, 0.38);
+  background: linear-gradient(
+    90deg,
+    var(--color-bg),
+    var(--color-accent),
+    var(--color-muted),
+    var(--color-bg)
+  );
+  box-shadow: 0 0 20px color-mix(in srgb, var(--color-accent) 40%, transparent);
 }
 
 .hero-copy {
@@ -124,31 +161,78 @@ h1 {
   line-height: 0.9;
   letter-spacing: 0;
   text-transform: uppercase;
+  color: var(--color-text);
+}
+
+body[data-theme="oscuro"] h1 {
   text-shadow:
     0 3px 0 #000,
-    0 0 22px rgba(37, 99, 235, 0.2);
+    0 0 22px color-mix(in srgb, var(--color-accent) 20%, transparent);
+}
+
+.hero-saludo {
+  margin: 14px 0 6px;
+  color: var(--color-muted);
+  font-size: 0.95rem;
+}
+
+.progreso-semanal {
+  height: 5px;
+  background: var(--color-border);
+  border-radius: 999px;
+  margin: 8px 0;
+  overflow: hidden;
+}
+
+.progreso-barra {
+  height: 100%;
+  background: var(--color-accent);
+  border-radius: 999px;
+  transition: width 0.4s ease;
+  min-width: 4px;
+}
+
+.sesion-timer {
+  margin: 6px 0 0;
+  color: var(--color-accent);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+/* ===================================================================
+   HERO CONTROLES (panel derecho)
+   =================================================================== */
+
+.hero-controles {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: relative;
+  z-index: 1;
 }
 
 .summary-board {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
-  position: relative;
-  z-index: 1;
 }
 
 .summary-board div {
-  min-height: 98px;
+  min-height: 80px;
   padding: 14px;
-  border: 1px solid rgba(71, 85, 105, 0.74);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
+  background: var(--color-surface-deep);
+}
+
+body[data-theme="oscuro"] .summary-board div {
   background: rgba(2, 2, 3, 0.82);
   box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.52);
 }
 
 .summary-board span {
   display: block;
-  color: #f1ede7;
+  color: var(--color-text);
   font-size: 2rem;
   font-weight: 900;
   line-height: 1;
@@ -161,14 +245,45 @@ h1 {
   text-transform: uppercase;
 }
 
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.modo-switch {
+  display: flex;
+  gap: 4px;
+}
+
+/* ===================================================================
+   MENSAJES DE ESTADO
+   =================================================================== */
+
 .status-message {
   margin: 18px 0 0;
   padding: 12px 14px;
-  border: 1px solid rgba(37, 99, 235, 0.38);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
-  color: #f1ede7;
-  background: rgba(15, 23, 42, 0.72);
+  color: var(--color-text);
+  background: var(--color-surface);
 }
+
+.status-cargando {
+  border-color: color-mix(in srgb, var(--color-accent) 40%, transparent);
+  color: var(--color-accent);
+}
+
+.status-error {
+  border-color: #ef4444;
+  color: #ef4444;
+  background: color-mix(in srgb, #ef4444 8%, var(--color-surface));
+}
+
+/* ===================================================================
+   CRUD LAYOUT
+   =================================================================== */
 
 .crud-layout {
   display: grid;
@@ -178,14 +293,29 @@ h1 {
   align-items: start;
 }
 
+/* ===================================================================
+   FORMULARIO Y CARDS — base compartida
+   =================================================================== */
+
 .item-form,
 .item-card,
 .empty-state {
   border: 1px solid var(--color-border);
   border-radius: 8px;
-  background:
-    linear-gradient(180deg, rgba(13, 17, 23, 0.96), rgba(3, 5, 8, 0.98));
-  box-shadow: var(--shadow-card);
+  background: var(--color-surface);
+  box-shadow: 0 4px 24px var(--color-shadow);
+}
+
+body[data-theme="oscuro"] .item-form,
+body[data-theme="oscuro"] .item-card,
+body[data-theme="oscuro"] .empty-state {
+  background: linear-gradient(180deg, rgba(13, 17, 23, 0.96), rgba(3, 5, 8, 0.98));
+  box-shadow: 0 28px 80px var(--color-shadow);
+}
+
+.item-form:hover,
+.item-card:hover {
+  border-color: color-mix(in srgb, var(--color-accent) 54%, transparent);
 }
 
 .item-form {
@@ -194,11 +324,6 @@ h1 {
   padding: 24px;
   position: sticky;
   top: 20px;
-}
-
-.item-form:hover,
-.item-card:hover {
-  border-color: rgba(37, 99, 235, 0.54);
 }
 
 .form-heading,
@@ -216,7 +341,12 @@ h1 {
   margin: 0;
   font-size: 1.45rem;
   text-transform: uppercase;
+  color: var(--color-text);
 }
+
+/* ===================================================================
+   INPUTS
+   =================================================================== */
 
 .item-form label {
   display: grid;
@@ -234,14 +364,14 @@ h1 {
   border-radius: 6px;
   padding: 10px 12px;
   color: var(--color-text);
-  background: #030304;
+  background: var(--color-input-bg);
 }
 
 .item-form input:focus,
 .item-form select:focus,
 .item-form textarea:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.16);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-accent) 16%, transparent);
 }
 
 .item-form textarea {
@@ -255,22 +385,30 @@ h1 {
 }
 
 .field-error {
-  color: #bfdbfe;
   font-size: 0.88rem;
   font-weight: 700;
+  color: #ef4444;
+}
+
+body[data-theme="oscuro"] .field-error {
+  color: #bfdbfe;
 }
 
 .checkbox-field {
   display: flex;
-  grid-template-columns: auto 1fr;
   align-items: center;
+  gap: 8px;
 }
 
 .checkbox-field input {
   width: 18px;
   min-height: 18px;
-  accent-color: var(--color-primary);
+  accent-color: var(--color-accent);
 }
+
+/* ===================================================================
+   BOTONES
+   =================================================================== */
 
 .button {
   min-height: 42px;
@@ -288,24 +426,50 @@ h1 {
 }
 
 .button.primary {
-  border: 1px solid #3b82f6;
-  background: linear-gradient(180deg, #2563eb, #1e3a8a);
+  border: 1px solid var(--color-accent);
+  background: var(--color-accent);
+  color: #ffffff;
+}
+
+body[data-theme="oscuro"] .button.primary {
+  background: linear-gradient(
+    180deg,
+    var(--color-accent),
+    color-mix(in srgb, var(--color-accent) 65%, #000)
+  );
 }
 
 .button.secondary {
-  border: 1px solid #475569;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-deep);
+  color: var(--color-text);
+}
+
+body[data-theme="oscuro"] .button.secondary {
+  border-color: #475569;
   background: linear-gradient(180deg, #1f2937, #080b10);
 }
 
 .button.danger {
-  border: 1px solid #334155;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-deep);
+  color: var(--color-muted);
+}
+
+body[data-theme="oscuro"] .button.danger {
+  border-color: #334155;
   background: linear-gradient(180deg, #111827, #030407);
 }
 
 .button.ghost {
   border: 1px solid var(--color-border);
   background: transparent;
+  color: var(--color-text);
 }
+
+/* ===================================================================
+   LISTA DE ITEMS
+   =================================================================== */
 
 .items-list {
   display: grid;
@@ -314,11 +478,18 @@ h1 {
 
 .item-card {
   padding: 22px;
-  border-left: 4px solid #2563eb;
+  border-left: 4px solid var(--color-accent);
+}
+
+body[data-theme="oscuro"] .item-card {
   box-shadow:
-    var(--shadow-card),
+    0 28px 80px var(--color-shadow),
     inset 0 0 0 1px rgba(255, 255, 255, 0.018);
 }
+
+/* ===================================================================
+   CATEGORY PILL & STATE BADGE
+   =================================================================== */
 
 .category-pill,
 .state-badge {
@@ -332,11 +503,15 @@ h1 {
 }
 
 .category-pill {
-  position: relative;
   padding: 7px 10px;
-  border: 1px solid #334155;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-deep);
+  color: var(--color-text);
+}
+
+body[data-theme="oscuro"] .category-pill {
+  border-color: #334155;
   background: linear-gradient(180deg, #10151d, #05070a);
-  color: #f1ede7;
   box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.64);
 }
 
@@ -347,26 +522,29 @@ h1 {
   border-radius: 999px;
   background: var(--category-color);
   box-shadow: 0 0 10px color-mix(in srgb, var(--category-color) 42%, transparent);
+  flex-shrink: 0;
 }
 
 .state-badge {
   padding: 8px 10px;
   text-transform: capitalize;
-  background: #0a080a;
-  border: 1px solid rgba(71, 85, 105, 0.56);
+  background: var(--color-surface-deep);
+  border: 1px solid var(--color-border);
+  color: var(--color-muted);
 }
 
-.state-planeado {
-  color: #d6d0d6;
+body[data-theme="oscuro"] .state-badge {
+  background: #0a080a;
+  border-color: rgba(71, 85, 105, 0.56);
 }
 
 .state-completado {
-  color: #f1ede7;
+  color: var(--color-accent);
 }
 
-.state-omitido {
-  color: #cbd5e1;
-}
+/* ===================================================================
+   MÉTRICAS
+   =================================================================== */
 
 .metric-grid {
   display: grid;
@@ -377,9 +555,14 @@ h1 {
 
 .metric-grid div {
   padding: 12px;
-  border: 1px solid rgba(71, 85, 105, 0.52);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
+  background: var(--color-surface-deep);
+}
+
+body[data-theme="oscuro"] .metric-grid div {
   background: rgba(2, 2, 3, 0.86);
+  border-color: rgba(71, 85, 105, 0.52);
 }
 
 .metric-grid dt {
@@ -394,6 +577,10 @@ h1 {
   font-weight: 900;
 }
 
+/* ===================================================================
+   CARD SECTIONS
+   =================================================================== */
+
 .card-section {
   margin-top: 18px;
 }
@@ -402,6 +589,7 @@ h1 {
   margin: 0 0 8px;
   font-size: 1rem;
   text-transform: uppercase;
+  color: var(--color-text);
 }
 
 .card-section p,
@@ -423,10 +611,15 @@ h1 {
 
 .exercise-list li {
   padding: 6px 10px;
-  border: 1px solid rgba(71, 85, 105, 0.54);
+  border: 1px solid var(--color-border);
   border-radius: 999px;
   color: var(--color-text);
+  background: var(--color-surface-deep);
+}
+
+body[data-theme="oscuro"] .exercise-list li {
   background: #050405;
+  border-color: rgba(71, 85, 105, 0.54);
 }
 
 .exercise-list li::before {
@@ -436,13 +629,13 @@ h1 {
   height: 6px;
   margin-right: 8px;
   border-radius: 999px;
-  background: var(--color-primary);
+  background: var(--color-accent);
   vertical-align: middle;
 }
 
 .pr-label {
   margin: 0 0 6px;
-  color: #f1ede7;
+  color: var(--color-text);
   font-weight: 900;
 }
 
@@ -457,6 +650,10 @@ h1 {
   gap: 12px;
 }
 
+/* ===================================================================
+   EMPTY STATE
+   =================================================================== */
+
 .empty-state {
   padding: 32px;
   text-align: center;
@@ -467,6 +664,19 @@ h1 {
   margin: 10px 0 0;
   color: var(--color-muted);
 }
+
+.eyebrow {
+  margin: 0 0 4px;
+  color: var(--color-accent);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* ===================================================================
+   RESPONSIVE
+   =================================================================== */
 
 @media (max-width: 860px) {
   .crud-layout,
