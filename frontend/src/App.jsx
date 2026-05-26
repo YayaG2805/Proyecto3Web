@@ -1,7 +1,12 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import FormularioItem from "./components/FormularioItem";
 import ListaItems from "./components/ListaItems";
+import PanelFiltros from "./components/PanelFiltros";
+import GraficaActividad from "./components/graficas/GraficaActividad";
+import GraficaCategorias from "./components/graficas/GraficaCategorias";
+import GraficaIntensidad from "./components/graficas/GraficaIntensidad";
 import { CATEGORIAS } from "./utils/categorias";
+import { itemsReducer, estadoInicial } from "./reducers/itemsReducer";
 import { useStorage } from "./context/useStorage";
 import { useTheme } from "./context/useTheme";
 import { useUser } from "./context/useUser";
@@ -18,18 +23,19 @@ function App() {
   const { tema, toggleTema } = useTheme();
   const { usuario } = useUser();
 
-  const [items, setItems] = useState([]);
+  const [state, dispatch] = useReducer(itemsReducer, estadoInicial);
+  const { lista, filtroCategoria, filtroEstado, busqueda } = state;
+
   const [itemEditando, setItemEditando] = useState(null);
   const [mensaje, setMensaje] = useState("");
   const [segundos, setSegundos] = useState(0);
 
-  // useRef uso 1: referencia al input de nombre para focus programático
+  // useRef uso 1: focus en el input de nombre para agregar sesión
   const nombreInputRef = useRef(null);
 
-  // useRef uso 2: ID del setInterval — no causa re-render al guardarse
+  // useRef uso 2: ID del setInterval guardado sin provocar re-render
   const intervalRef = useRef(null);
 
-  // Contador de tiempo activo en la sesión
   useEffect(() => {
     intervalRef.current = setInterval(() => {
       setSegundos((s) => s + 1);
@@ -37,16 +43,15 @@ function App() {
     return () => clearInterval(intervalRef.current);
   }, []);
 
-  // Recarga items cuando cambia el modo (obtenerItems cambia con modo)
+  // Recarga con HIDRATAR cuando cambia el modo
   useEffect(() => {
     async function cargar() {
       const data = await obtenerItems();
-      setItems(data.filter((item) => item.activo));
+      dispatch({ type: "HIDRATAR", payload: data });
     }
     cargar();
   }, [obtenerItems]);
 
-  // Atajo Ctrl+N para enfocar el input de nombre
   useEffect(() => {
     const handler = (evento) => {
       if (evento.ctrlKey && (evento.key === "n" || evento.key === "N")) {
@@ -58,59 +63,95 @@ function App() {
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
-  async function recargarItems() {
-    const data = await obtenerItems();
-    setItems(data.filter((item) => item.activo));
-  }
+  // ─── useMemo: lista filtrada y estadísticas ───────────────────
 
-  async function agregarItem(item) {
-    await guardarItem(item);
-    await recargarItems();
-    setMensaje("Sesión agregada correctamente.");
-    nombreInputRef.current?.focus();
-  }
-
-  async function actualizarItem(itemActualizado) {
-    await guardarItem(itemActualizado);
-    await recargarItems();
-    setItemEditando(null);
-    setMensaje("Sesión actualizada correctamente.");
-  }
-
-  async function archivarItem(id) {
-    await eliminarItem(id);
-    await recargarItems();
-    setMensaje("Sesión archivada correctamente.");
-  }
-
-  function iniciarEdicion(item) {
-    setItemEditando(item);
-    setMensaje("");
-  }
-
-  function cancelarEdicion() {
-    setItemEditando(null);
-    setMensaje("");
-  }
+  const listaFiltrada = useMemo(() => {
+    return lista
+      .filter((item) => item.activo)
+      .filter((item) =>
+        filtroCategoria === "todas" || item.categoriaId === filtroCategoria
+      )
+      .filter((item) =>
+        filtroEstado === "todos" || item.estado === filtroEstado
+      )
+      .filter((item) =>
+        item.nombre.toLowerCase().includes(busqueda.toLowerCase())
+      );
+  }, [lista, filtroCategoria, filtroEstado, busqueda]);
 
   const sesionesCompletadas = useMemo(
-    () => items.filter((item) => item.estado === "completado").length,
-    [items]
+    () => listaFiltrada.filter((item) => item.estado === "completado").length,
+    [listaFiltrada]
   );
 
   const minutosTotales = useMemo(
     () =>
-      items.reduce(
+      listaFiltrada.reduce(
         (total, item) => total + Number(item.atributos?.duracionMinutos ?? 0),
         0
       ),
-    [items]
+    [listaFiltrada]
   );
 
   const progresoSemanal = Math.min(
     Math.round((minutosTotales / usuario.preferencias.objetivoSemanal) * 100),
     100
   );
+
+  // ─── useCallback: handlers pasados a componentes hijos ────────
+
+  const manejarEditar = useCallback((item) => {
+    setItemEditando(item);
+    setMensaje("");
+  }, []);
+
+  const manejarArchivar = useCallback(
+    async (id) => {
+      await eliminarItem(id);
+      dispatch({ type: "ELIMINAR", payload: id, fecha: new Date().toISOString() });
+      setMensaje("Sesión archivada correctamente.");
+    },
+    [eliminarItem]
+  );
+
+  const manejarCambiarEstado = useCallback((id, nuevoEstado) => {
+    dispatch({ type: "CAMBIAR_ESTADO", payload: { id, estado: nuevoEstado } });
+  }, []);
+
+  const manejarRegistrarActividad = useCallback((id) => {
+    dispatch({
+      type: "REGISTRAR_ACTIVIDAD",
+      payload: {
+        id,
+        registro: { fecha: new Date().toISOString(), tipo: "actividad" },
+      },
+    });
+  }, []);
+
+  // ─── Funciones async que coordinan storage + reducer ─────────
+
+  async function agregarItem(item) {
+    const guardado = await guardarItem(item);
+    if (guardado) {
+      dispatch({ type: "AGREGAR", payload: guardado });
+      setMensaje("Sesión agregada correctamente.");
+      nombreInputRef.current?.focus();
+    }
+  }
+
+  async function actualizarItem(itemActualizado) {
+    const guardado = await guardarItem(itemActualizado);
+    if (guardado) {
+      dispatch({ type: "ACTUALIZAR", payload: guardado });
+      setItemEditando(null);
+      setMensaje("Sesión actualizada correctamente.");
+    }
+  }
+
+  function cancelarEdicion() {
+    setItemEditando(null);
+    setMensaje("");
+  }
 
   return (
     <main className="app-shell">
@@ -138,7 +179,7 @@ function App() {
         <div className="hero-controles">
           <div className="summary-board" aria-label="Resumen de sesiones">
             <div>
-              <span>{items.length}</span>
+              <span>{listaFiltrada.length}</span>
               <p>Activas</p>
             </div>
             <div>
@@ -191,6 +232,19 @@ function App() {
         <p className="status-message">{mensaje}</p>
       )}
 
+      <PanelFiltros
+        filtroCategoria={filtroCategoria}
+        filtroEstado={filtroEstado}
+        busqueda={busqueda}
+        dispatch={dispatch}
+      />
+
+      <section className="seccion-graficas" aria-label="Visualización de entrenamientos">
+        <GraficaActividad items={listaFiltrada} />
+        <GraficaCategorias items={listaFiltrada} />
+        <GraficaIntensidad items={listaFiltrada} />
+      </section>
+
       <section className="crud-layout" aria-label="CRUD de sesiones">
         <FormularioItem
           ref={nombreInputRef}
@@ -201,10 +255,12 @@ function App() {
         />
 
         <ListaItems
-          items={items}
+          items={listaFiltrada}
           categorias={CATEGORIAS}
-          onEditar={iniciarEdicion}
-          onArchivar={archivarItem}
+          onEditar={manejarEditar}
+          onArchivar={manejarArchivar}
+          onCambiarEstado={manejarCambiarEstado}
+          onRegistrarActividad={manejarRegistrarActividad}
         />
       </section>
     </main>
