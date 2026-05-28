@@ -306,6 +306,70 @@ El azul muy oscuro `#0f172a` como fondo lo elegí porque es el que mejor aguanta
 
 ---
 
+## Fase 3 — useReducer, Recharts y Optimizacion
+
+### useReducer — 7 acciones puras
+
+`src/reducers/itemsReducer.js` centraliza todo el estado de la lista. El reducer es una función pura: no llama a `fetch`, no lee `Date.now()`, no toca `localStorage`. Todo valor externo (fechas, payloads) entra por la acción.
+
+| Acción | Qué hace |
+| --- | --- |
+| `HIDRATAR` | Reemplaza la lista completa con datos de la fuente activa |
+| `AGREGAR` | Inserta un item nuevo al inicio de la lista |
+| `ACTUALIZAR` | Reemplaza el item cuyo id coincide |
+| `ELIMINAR` | Marca el item como `activo: false` (archivado) |
+| `CAMBIAR_ESTADO` | Cambia el campo `estado` del item (planeado → completado → omitido) |
+| `FILTRAR` | Actualiza los campos de filtro (`filtroCategoria`, `filtroEstado`, `busqueda`) |
+| `LIMPIAR_FILTROS` | Resetea todos los filtros a sus valores por defecto |
+| `REGISTRAR_ACTIVIDAD` | Agrega una entrada al array `historial` del item |
+
+### useMemo y useCallback
+
+`listaFiltrada` se calcula con `useMemo([lista, filtroCategoria, filtroEstado, busqueda])`. Solo se recalcula cuando cambia alguno de esos cuatro valores, no en cada render.
+
+Los handlers `manejarEditar`, `manejarArchivar`, `manejarCambiarEstado` y `manejarRegistrarActividad` están envueltos en `useCallback`. Como `ItemCard` está memoizado con `React.memo`, las referencias estables evitan re-renders innecesarios al agregar o actualizar otro item de la lista.
+
+### PanelFiltros
+
+`src/components/PanelFiltros.jsx` despacha acciones `FILTRAR` directamente al reducer. Contiene:
+
+- Input de búsqueda por nombre (filtra en tiempo real)
+- Select de categoría
+- Select de estado
+- Botón "Limpiar filtros" (solo visible cuando hay algún filtro activo)
+
+### Gráficas Recharts
+
+Las tres gráficas reciben `listaFiltrada` como prop, así que responden a los filtros en tiempo real.
+
+| Componente | Tipo | Qué muestra |
+| --- | --- | --- |
+| `GraficaActividad` | BarChart | Sesiones y minutos por día — últimos 7 días |
+| `GraficaCategorias` | PieChart | Distribución porcentual por categoría |
+| `GraficaIntensidad` | BarChart | Duración promedio (min) por nivel de intensidad |
+
+### Mi gráfica original — GraficaIntensidad
+
+La gráfica de duración promedio por intensidad fue mi aporte original para esta fase. La elegí porque en entrenamiento no es obvio cómo se relacionan la intensidad y el tiempo: alguien podría suponer que sesiones de alta intensidad duran más, pero en mi caso es al revés — las sesiones de baja intensidad tienden a ser cardio largo (60–90 min) mientras que las de alta intensidad son circuitos densos de 30–45 min.
+
+El color de cada barra refleja la intensidad: verde `#22c55e` para baja, naranja `#f97316` para media y rojo `#ef4444` para alta. Usé `LabelList` para mostrar el valor directamente sobre cada barra y `Cell` para aplicar el color individualmente. El tooltip incluye también la cantidad de sesiones que alimentan ese promedio, porque un promedio de 1 sesión no vale igual que uno de 10.
+
+### Mis 3 decisiones tecnicas — Fase 3
+
+**1. Reducer puro sin efectos secundarios**
+
+El reducer nunca genera fechas ni IDs. La acción `ELIMINAR` recibe la fecha de archivado como `accion.fecha`. La acción `REGISTRAR_ACTIVIDAD` recibe el objeto registro ya construido. Esto hace el reducer testeable sin mocks: dado un estado y una acción, la salida es siempre determinista.
+
+**2. Charts reciben listaFiltrada, no lista completa**
+
+Las tres gráficas no acceden al estado global ni al contexto. Solo reciben `items` como prop. Al pasarles `listaFiltrada` (ya procesada por `useMemo`), el comportamiento es automático: filtrar por categoría o estado actualiza las gráficas sin ningún código extra en los componentes de gráfica.
+
+**3. Estado del ciclo de estado en ItemCard, no en App**
+
+El objeto `ESTADOS_CICLO` que define la transición `planeado → completado → omitido → planeado` vive en `ItemCard.jsx`. La tarjeta sabe cuál es el siguiente estado; App solo recibe `(id, nuevoEstado)` y despacha `CAMBIAR_ESTADO`. Esta separación mantiene la lógica de presentación en el componente de presentación.
+
+---
+
 ## Decisiones tecnicas
 
 - Se uso `useState` con lazy initializer para leer LocalStorage solo al montar el componente.
