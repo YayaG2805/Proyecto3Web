@@ -1,15 +1,24 @@
-function formatearFecha(fechaIso) {
-  if (!fechaIso) {
-    return "Sin fecha";
-  }
+import { memo } from "react";
 
+// React.memo evita re-renders cuando las props no cambian.
+// Los handlers onEditar, onArchivar, onCambiarEstado vienen envueltos
+// en useCallback desde App, así que la referencia es estable.
+
+const ESTADOS_CICLO = {
+  planeado: "completado",
+  completado: "omitido",
+  omitido: "planeado",
+};
+
+function formatearFecha(fechaIso) {
+  if (!fechaIso) return "Sin fecha";
   return new Intl.DateTimeFormat("es-GT", {
     dateStyle: "medium",
-    timeStyle: "short"
+    timeStyle: "short",
   }).format(new Date(fechaIso));
 }
 
-function ItemCard({ item, categorias, onEditar, onArchivar }) {
+function ItemCard({ item, categorias, onEditar, onArchivar, onCambiarEstado, onRegistrarActividad }) {
   const categoria = categorias.find((actual) => actual.id === item.categoriaId);
   const atributos = item.atributos ?? {};
   const ejercicios = atributos.ejercicios ?? [];
@@ -27,21 +36,28 @@ function ItemCard({ item, categorias, onEditar, onArchivar }) {
           </p>
           <h2>{item.nombre}</h2>
         </div>
-        <span className={`state-badge state-${item.estado}`}>{item.estado}</span>
+        <button
+          className={`state-badge state-${item.estado}`}
+          type="button"
+          onClick={() => onCambiarEstado(item.id, ESTADOS_CICLO[item.estado])}
+          title="Clic para cambiar estado"
+        >
+          {item.estado}
+        </button>
       </div>
 
       <dl className="metric-grid">
         <div>
-          <dt>Puntuacion</dt>
-          <dd>{item.puntuacion ?? "Sin nota"}</dd>
+          <dt>Puntuación</dt>
+          <dd>{item.puntuacion ?? "—"}</dd>
         </div>
         <div>
-          <dt>Duracion</dt>
+          <dt>Duración</dt>
           <dd>{atributos.duracionMinutos ?? 0} min</dd>
         </div>
         <div>
           <dt>Intensidad</dt>
-          <dd>{atributos.intensidad ?? "sin dato"}</dd>
+          <dd>{atributos.intensidad ?? "—"}</dd>
         </div>
         <div>
           <dt>Volumen</dt>
@@ -74,8 +90,20 @@ function ItemCard({ item, categorias, onEditar, onArchivar }) {
           <p className="date-label">Registro: {formatearFecha(item.fechaRegistro)}</p>
         </div>
         <div className="card-actions">
-          <button className="button secondary" type="button" onClick={() => onEditar(item)}>
+          <button
+            className="button secondary"
+            type="button"
+            onClick={() => onEditar(item)}
+          >
             Editar
+          </button>
+          <button
+            className="button ghost"
+            type="button"
+            onClick={() => onRegistrarActividad(item.id)}
+            title="Registrar actividad en historial"
+          >
+            Registrar
           </button>
           <button
             className="button danger"
@@ -90,4 +118,5 @@ function ItemCard({ item, categorias, onEditar, onArchivar }) {
   );
 }
 
-export default ItemCard;
+// React.memo: solo re-renderiza si cambian las props
+export default memo(ItemCard);

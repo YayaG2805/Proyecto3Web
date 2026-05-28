@@ -282,6 +282,112 @@ body[data-theme="oscuro"] .summary-board div {
 }
 
 /* ===================================================================
+   PANEL DE FILTROS
+   =================================================================== */
+
+.panel-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-top: 20px;
+  padding: 14px 18px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+}
+
+.filtro-busqueda {
+  flex: 1;
+  min-width: 180px;
+  min-height: 38px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: var(--color-text);
+  background: var(--color-input-bg);
+  font: inherit;
+}
+
+.filtro-busqueda:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 16%, transparent);
+  outline: none;
+}
+
+.filtro-select {
+  min-height: 38px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: var(--color-text);
+  background: var(--color-input-bg);
+  font: inherit;
+  cursor: pointer;
+}
+
+.filtro-select:focus {
+  border-color: var(--color-accent);
+  outline: none;
+}
+
+.filtro-limpiar {
+  white-space: nowrap;
+}
+
+/* ===================================================================
+   SECCIÓN DE GRÁFICAS
+   =================================================================== */
+
+.seccion-graficas {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.grafica-contenedor {
+  padding: 18px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+  box-shadow: 0 2px 12px var(--color-shadow);
+}
+
+body[data-theme="oscuro"] .grafica-contenedor {
+  background: linear-gradient(180deg, rgba(13, 17, 23, 0.96), rgba(3, 5, 8, 0.98));
+}
+
+.grafica-titulo {
+  margin: 0 0 14px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-muted);
+}
+
+.grafica-vacia {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 220px;
+  color: var(--color-muted);
+}
+
+.grafica-vacia p {
+  margin: 8px 0 0;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 900px) {
+  .seccion-graficas {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===================================================================
    CRUD LAYOUT
    =================================================================== */
 
