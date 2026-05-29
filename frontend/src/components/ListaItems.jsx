@@ -1,6 +1,6 @@
 import ItemCard from "./ItemCard";
 
-function ListaItems({ items, categorias, onEditar, onArchivar }) {
+function ListaItems({ items, categorias, onEditar, onArchivar, onCambiarEstado, onRegistrarActividad }) {
   if (items.length === 0) {
     return (
       <section className="empty-state">
@@ -19,6 +19,8 @@ function ListaItems({ items, categorias, onEditar, onArchivar }) {
           categorias={categorias}
           onEditar={onEditar}
           onArchivar={onArchivar}
+          onCambiarEstado={onCambiarEstado}
+          onRegistrarActividad={onRegistrarActividad}
         />
       ))}
     </section>
