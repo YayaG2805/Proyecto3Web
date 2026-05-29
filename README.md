@@ -236,7 +236,7 @@ El header muestra el saludo y una barra de progreso hacia el objetivo semanal de
 | Atajo | Acción |
 | --- | --- |
 | `T` | Cambia entre tema claro y oscuro |
-| `Ctrl + N` | Enfoca el input de nombre para agregar sesión |
+| `Alt + N` | Enfoca el input de nombre para agregar sesión |
 
 Ambos usan `addEventListener` con cleanup `removeEventListener` en el return del `useEffect`.
 

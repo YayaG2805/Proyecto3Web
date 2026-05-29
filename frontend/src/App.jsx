@@ -54,7 +54,7 @@ function App() {
 
   useEffect(() => {
     const handler = (evento) => {
-      if (evento.ctrlKey && (evento.key === "n" || evento.key === "N")) {
+      if (evento.altKey && (evento.key === "n" || evento.key === "N")) {
         evento.preventDefault();
         nombreInputRef.current?.focus();
       }
